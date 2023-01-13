@@ -1,7 +1,7 @@
 # 🚢 MTProxy Docker Image
 
-[![](https://img.shields.io/docker/pulls/mtproxy/mtproxy.svg?style=flat-square)](https://hub.docker.com/r/mtproxy/mtproxy)
-[![](https://img.shields.io/microbadger/image-size/mtproxy%2Fmtproxy.svg?style=flat-square)](https://microbadger.com/images/mtproxy/mtproxy)
+[![](https://img.shields.io/docker/pulls/zeroberto/mtproto-proxy.svg?style=flat-square)](https://hub.docker.com/r/zeroberto/mtproto-proxy)
+[![](https://img.shields.io/microbadger/image-size/mtproxy%2Fmtproxy.svg?style=flat-square)](https://microbadger.com/images/zeroberto/mtproto-proxy)
 
 The Telegram Messenger [MTProto proxy](https://github.com/TelegramMessenger/MTProxy) is a zero-configuration container that automatically sets up a proxy server that speaks Telegram's native MTProto.
 
@@ -9,14 +9,25 @@ The Telegram Messenger [MTProto proxy](https://github.com/TelegramMessenger/MTPr
 
 ##  🚀 Quick Reference
 
-First pull the docker image from docker-hub: `docker pull mtproxy/mtproxy`
+First pull the docker image from docker-hub: `zeroberto/mtproto-proxy`
+
+## Production use
+
+```bash
+mkdir -p /opt/mtproxy
+docker run -d --network host \
+-p 443:443 -p 2398:2398 --name=mtproxy \
+--restart=always \
+-e SECRET=$(hexdump -vn16 -e'4/4 "%08X" 1 "\n"' /dev/urandom) \
+-v /opt/mtproxy:/data zeroberto/mtproto-proxy:latest
+```
 
 ### 🧪 For Test
 
 To quickly try it out use:
 
 ```bash
-docker run -it --rm -p443:443 mtproxy/mtproxy
+docker run -it --rm -p 443:443 zeroberto/mtproto-proxy:latest
 ```
 
 The container's log output will contain the links to paste into the Telegram app:
@@ -37,7 +48,7 @@ The container's log output will contain the links to paste into the Telegram app
 To start the proxy as a permanent daemon which starts after server/docker restart:
 
 ```bash
-docker run -d -p443:443 --name=mtproxy --restart=always -v mtproxy:/data mtproxy/mtproxy
+docker run -d -p 443:443 --name=mtproxy --restart=always -v mtproxy:/data zeroberto/mtproto-proxy:latest
 ````
 
 Then obtain links for Telegram app by reading container's logs with `docker logs -f mtproxy`.
@@ -62,19 +73,19 @@ Several options are configurable using environment variables.
 
 ### `SECRET`/`SECRET_COUNT`
 
-If you need to specify a custom secret (say, if you are deploying multiple proxies with DNS load-balancing), you may pass the `SECRET` environment variable as 16 bytes in lower-case hexidecimals: `docker run ... -e SECRET=00baadf00d15abad1deaa51sbaadcafe mtproxy/mtproxy`
+If you need to specify a custom secret (say, if you are deploying multiple proxies with DNS load-balancing), you may pass the `SECRET` environment variable as 16 bytes in lower-case hexidecimals: `docker run ... -e SECRET=00baadf00d15abad1deaa51sbaadcafe zeroberto/mtproto-proxy:latest`
 
 The proxy may be configured to accept up to 16 different secrets. You may specify them explicitly as comma-separated hex strings in the `SECRET` environment variable, or you may let the container generate the secrets automatically using the `SECRET_COUNT` variable to limit the number of generated secrets.
 
-**💡Example:** Manualy specify different secrets: `docker run ... -e SECRET=secret1,secret2 mtproxy/mtproxy` 
+**💡Example:** Manualy specify different secrets: `docker run ... -e SECRET=secret1,secret2 zeroberto/mtproto-proxy:latest` 
 
-**💡Example:** Set secret count: `docker run ... -e SECRET_COUNT=4 mtproxy/mtproxy`
+**💡Example:** Set secret count: `docker run ... -e SECRET_COUNT=4 zeroberto/mtproto-proxy:latest`
 
 ### `TAG`
 
 A custom advertisement tag may be provided using the `TAG` environment variable:
 
-**💡Example:** Setting Tag: `docker run ... -e TAG=3f40462915a3e6026a4d790127b95ded mtproxy/mtproxy`
+**💡Example:** Setting Tag: `docker run ... -e TAG=3f40462915a3e6026a4d790127b95ded zeroberto/mtproto-proxy:latest`
 
 Please note that the tag is not persistent. You'll have to provide it as an environment variable every time you run an MTProto proxy container.
 
@@ -82,7 +93,7 @@ Please note that the tag is not persistent. You'll have to provide it as an envi
 
 A single worker process is expected to handle tens of thousands of clients on a modern CPU. For best performance we artificially limit the proxy to `60000` connections per core and run **one** workers by default. If you have many clients, be sure to adjust the `WORKERS` variable.
 
-**💡Example:** Setting number of workers to 16: `docker run ... -e WORKERS=16 mtproxy/mtproxy`
+**💡Example:** Setting number of workers to 16: `docker run ... -e WORKERS=16 zeroberto/mtproto-proxy:latest`
 
 ### Other Environment Variables
 

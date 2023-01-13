@@ -9,7 +9,7 @@ RUN git clone https://github.com/TelegramMessenger/MTProxy.git
 RUN cd MTProxy && git checkout $COMMIT && make
 
 # Stage 1: Runtime
-FROM debian:9-slim
+FROM debian:bullseye-20230109-slim
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -17,10 +17,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt
 
 COPY --from=0 /MTProxy/objs/bin/mtproto-proxy /bin
+COPY run.sh /
 
 EXPOSE 443 2398
 VOLUME /data
 WORKDIR /data
 ENTRYPOINT /run.sh
 
-COPY run.sh /
+
