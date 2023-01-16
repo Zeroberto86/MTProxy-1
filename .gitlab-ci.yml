@@ -1,0 +1,13 @@
+include:
+  - project: 'devops/cicd'
+    ref: 'main'
+    file: 'default.yaml'
+
+stages:
+  - notification
+
+notification:
+  stage: notification
+  tags: 
+    - shell
+  extends: .notification
